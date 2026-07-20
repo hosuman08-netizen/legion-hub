@@ -38,10 +38,11 @@ footer{text-align:center;color:#4f4a60;font-size:11px;margin-top:40px;line-heigh
 
 <div id="tonight-strip" style="max-width:920px;margin:0 auto 16px;padding:12px 16px;border:1px solid #3d3550;border-radius:12px;background:#15131d;display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:center">
   <span style="color:#e0b552;font-weight:700;font-size:13px">🔥 Tonight</span>
-  <a href="https://hosuman08-netizen.github.io/daedalus-conquest/" style="color:#ece8f1;font-size:13px">Daedalus 일일임무</a>
-  <a href="https://hosuman08-netizen.github.io/saju-miniapp/" style="color:#ece8f1;font-size:13px">사주 30초</a>
-  <a href="https://hosuman08-netizen.github.io/tarot-oracle/" style="color:#ece8f1;font-size:13px">타로 1장</a>
-  <a href="https://hosuman08-netizen.github.io/my-pantheon/" style="color:#ece8f1;font-size:13px">Pantheon 스토리</a>
+  <span id="tonight-cd" style="color:#e07070;font-size:12px;font-weight:600" aria-live="polite"></span>
+  <a class="tn" data-u="daedalus-conquest/" style="color:#ece8f1;font-size:13px" href="https://hosuman08-netizen.github.io/daedalus-conquest/">Daedalus 일일임무</a>
+  <a class="tn" data-u="saju-miniapp/" style="color:#ece8f1;font-size:13px" href="https://hosuman08-netizen.github.io/saju-miniapp/">사주 30초</a>
+  <a class="tn" data-u="tarot-oracle/" style="color:#ece8f1;font-size:13px" href="https://hosuman08-netizen.github.io/tarot-oracle/">타로 1장</a>
+  <a class="tn" data-u="my-pantheon/" style="color:#ece8f1;font-size:13px" href="https://hosuman08-netizen.github.io/my-pantheon/">Pantheon 스토리</a>
 </div>
 
 <div class="grid" id="g"></div>
@@ -89,4 +90,22 @@ APPS.forEach(function(a){
  el.innerHTML='<span class="emo">'+a.e+'</span><div class="nm">'+a.n+'</div><div class="ds">'+a.d+'</div>';
  g.appendChild(el);
 });
+// Tonight FOMO: countdown to local midnight + K-ref on quick links
+(function(){
+  try{
+    document.querySelectorAll('a.tn').forEach(function(a){
+      var u=a.getAttribute('data-u'); if(u) a.href=withK(B+u);
+    });
+    function tick(){
+      var el=document.getElementById('tonight-cd'); if(!el) return;
+      var now=new Date();
+      var end=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1,0,0,0);
+      var ms=end-now;
+      if(ms<0) ms=0;
+      var h=Math.floor(ms/3600000), m=Math.floor((ms%3600000)/60000), s=Math.floor((ms%60000)/1000);
+      el.textContent='자정까지 '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+    }
+    tick(); setInterval(tick,1000);
+  }catch(e){}
+})();
 </script></body></html>
