@@ -45,9 +45,14 @@ footer{text-align:center;color:#4f4a60;font-size:11px;margin-top:40px;line-heigh
 </div>
 
 <div class="grid" id="g"></div>
-<footer>All apps are free browser experiences. Simulation/entertainment only — not financial or professional advice.<br>© Legion · hosuman08</footer>
+<footer>All apps are free browser experiences. Simulation/entertainment only — not financial or professional advice.<br>
+<a href="mailto:hoyashi95@gmail.com?subject=%5BLegion%20Arcade%5D%20feedback" style="color:#8a8398">피드백</a>
+ · © Legion · hosuman08</footer>
 </div><script>
 var B="https://hosuman08-netizen.github.io/";
+// K-link: tag hub traffic so downstream apps can attribute (local only)
+function kRef(){try{var id=localStorage.getItem('hub_k_id');if(!id){id='h'+Math.random().toString(36).slice(2,8);localStorage.setItem('hub_k_id',id);}return id;}catch(e){return 'hub';}}
+function withK(u){try{var sep=u.indexOf('?')>=0?'&':'?';return u+sep+'ref='+encodeURIComponent(kRef());}catch(e){return u;}}
 var APPS=[
 {c:"게임 · Games"},
 {e:"⚔️",n:"Daedalus",d:"AI 군단 방치형 RPG",u:B+"daedalus-conquest/"},
@@ -80,7 +85,7 @@ var APPS=[
 var g=document.getElementById('g');
 APPS.forEach(function(a){
  if(a.c){var h=document.createElement('div');h.className='cat';h.textContent=a.c;g.appendChild(h);return;}
- var el=document.createElement('a');el.className='card';el.href=a.u;
+ var el=document.createElement('a');el.className='card';el.href=withK(a.u);
  el.innerHTML='<span class="emo">'+a.e+'</span><div class="nm">'+a.n+'</div><div class="ds">'+a.d+'</div>';
  g.appendChild(el);
 });
