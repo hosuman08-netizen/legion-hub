@@ -116,6 +116,11 @@ function renderContinue(){
     if(!last && !pins.length){el.style.display='none';return;}
     el.style.display='block';
     var html='';
+    try{
+      var d=new Date(); var dk=d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+      var opens=+(localStorage.getItem('hub_day_open_'+dk)||0);
+      if(opens) html+='<div style="margin-bottom:6px;font-size:12px;color:#8a8398">오늘 앱 탭 '+opens+'회</div>';
+    }catch(e){}
     if(last&&last.u){
       html+='<div style="margin-bottom:8px"><span style="color:#e0b552;font-weight:700;font-size:13px">▶ 이어서 </span>'
         +'<a href="'+withK(last.u)+'" style="color:#ece8f1;font-size:13px;margin-left:8px">'+ (last.n||'최근 앱') +'</a></div>';
