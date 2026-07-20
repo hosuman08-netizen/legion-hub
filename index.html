@@ -107,7 +107,7 @@ function withK(u){try{var sep=u.indexOf('?')>=0?'&':'?';return u+sep+'ref='+enco
 // continue last + pin favorites (local retention loop)
 function hubPins(){try{return JSON.parse(localStorage.getItem('hub_pins')||'[]');}catch(e){return[];}}
 function savePins(a){try{localStorage.setItem('hub_pins',JSON.stringify(a.slice(0,8)));}catch(e){}}
-function markPlay(n,u){try{localStorage.setItem('hub_last_play',JSON.stringify({n:n,u:u,t:Date.now()}));}catch(e){}}
+function markPlay(n,u){try{localStorage.setItem('hub_last_play',JSON.stringify({n:n,u:u,t:Date.now()}));var r=JSON.parse(localStorage.getItem('hub_recent')||'[]');r=r.filter(function(x){return x.u!==u});r.unshift({n:n,u:u,t:Date.now()});localStorage.setItem('hub_recent',JSON.stringify(r.slice(0,8)));}catch(e){}}
 function renderContinue(){
   try{
     var el=document.getElementById('continue-strip'); if(!el)return;
@@ -125,7 +125,8 @@ function renderContinue(){
         +pins.map(function(p){return '<a href="'+withK(p.u)+'" style="color:#ece8f1;font-size:12px;padding:4px 10px;border:1px solid #3d3550;border-radius:999px;text-decoration:none">'+p.n+'</a>';}).join('')
         +'</div>';
     }
-    el.innerHTML=html;
+    try{var recent=JSON.parse(localStorage.getItem('hub_recent')||'[]');if(recent.length){html+='<div style="margin-top:8px;font-size:12px;color:#8a8398">최근 ';recent.slice(0,5).forEach(function(r){html+='<a href="'+withK(r.u)+'" style="color:#ece8f1;margin-right:8px">'+(r.n||'app').slice(0,14)+'</a>';});html+='</div>';}}catch(e){}
+el.innerHTML=html;
   }catch(e){}
 }
 
