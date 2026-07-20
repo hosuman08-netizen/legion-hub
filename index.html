@@ -107,7 +107,7 @@ function withK(u){try{var sep=u.indexOf('?')>=0?'&':'?';return u+sep+'ref='+enco
 // continue last + pin favorites (local retention loop)
 function hubPins(){try{return JSON.parse(localStorage.getItem('hub_pins')||'[]');}catch(e){return[];}}
 function savePins(a){try{localStorage.setItem('hub_pins',JSON.stringify(a.slice(0,8)));}catch(e){}}
-function markPlay(n,u){try{localStorage.setItem('hub_last_play',JSON.stringify({n:n,u:u,t:Date.now()}));var r=JSON.parse(localStorage.getItem('hub_recent')||'[]');r=r.filter(function(x){return x.u!==u});r.unshift({n:n,u:u,t:Date.now()});localStorage.setItem('hub_recent',JSON.stringify(r.slice(0,8)));}catch(e){}}
+function markPlay(n,u){try{localStorage.setItem('hub_last_play',JSON.stringify({n:n,u:u,t:Date.now()}));var r=JSON.parse(localStorage.getItem('hub_recent')||'[]');r=r.filter(function(x){return x.u!==u});r.unshift({n:n,u:u,t:Date.now()});localStorage.setItem('hub_recent',JSON.stringify(r.slice(0,8)));var d=new Date();var dk=d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();localStorage.setItem('hub_day_open_'+dk,String((+(localStorage.getItem('hub_day_open_'+dk)||0))+1));var uniq=JSON.parse(localStorage.getItem('hub_day_uniq_'+dk)||'[]');if(uniq.indexOf(u)<0){uniq.push(u);localStorage.setItem('hub_day_uniq_'+dk,JSON.stringify(uniq.slice(0,40)));}}catch(e){}}
 function renderContinue(){
   try{
     var el=document.getElementById('continue-strip'); if(!el)return;
@@ -119,11 +119,25 @@ function renderContinue(){
     try{
       var d=new Date(); var dk=d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
       var opens=+(localStorage.getItem('hub_day_open_'+dk)||0);
-      if(opens) html+='<div style="margin-bottom:6px;font-size:12px;color:#8a8398">오늘 앱 탭 '+opens+'회</div>';
+      var uniq=0;
+      try{ uniq=(JSON.parse(localStorage.getItem('hub_day_uniq_'+dk)||'[]')||[]).length; }catch(e2){}
+      if(opens||uniq) html+='<div style="margin-bottom:6px;font-size:12px;color:#8a8398">오늘 탭 '+opens+' · 서로 다른 앱 '+uniq+(uniq>=3?' · field#1 워밍 ✓':' · 3앱 목표')+'</div>';
+      // 7d open spark
+      var spark='';
+      for(var i=6;i>=0;i--){
+        var dd=new Date(); dd.setDate(dd.getDate()-i);
+        var kk=dd.getFullYear()+'-'+(dd.getMonth()+1)+'-'+dd.getDate();
+        var nn=+(localStorage.getItem('hub_day_open_'+kk)||0);
+        spark+='<span title="'+kk+' '+nn+'" style="display:inline-block;width:10px;height:'+Math.max(4,Math.min(18,nn*3))+'px;background:'+(nn?'#e0b552':'#2a2438')+';border-radius:2px;margin-right:2px;vertical-align:bottom"></span>';
+      }
+      html+='<div style="margin-bottom:8px;line-height:18px">'+spark+' <span style="font-size:11px;color:#5f5a70">7일 탭</span></div>';
     }catch(e){}
     if(last&&last.u){
+      var ago='';
+      try{ if(last.t){ var m=Math.round((Date.now()-last.t)/60000); ago=m<60?(m+'분 전'):(Math.round(m/60)+'시간 전'); } }catch(e){}
       html+='<div style="margin-bottom:8px"><span style="color:#e0b552;font-weight:700;font-size:13px">▶ 이어서 </span>'
-        +'<a href="'+withK(last.u)+'" style="color:#ece8f1;font-size:13px;margin-left:8px">'+ (last.n||'최근 앱') +'</a></div>';
+        +'<a href="'+withK(last.u)+'" style="color:#ece8f1;font-size:13px;margin-left:8px">'+ (last.n||'최근 앱') +'</a>'
+        +(ago?' <span style="font-size:11px;color:#8a8398">'+ago+'</span>':'')+'</div>';
     }
     if(pins.length){
       html+='<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span style="color:#8a8398;font-size:12px">📌 핀</span>'
