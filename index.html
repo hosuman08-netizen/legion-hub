@@ -74,7 +74,13 @@ footer{text-align:center;color:#4f4a60;font-size:11px;margin-top:40px;line-heigh
     var live=document.getElementById('field1-live');
     if(live){
       var n=parseInt(localStorage.getItem('hub_streak')||'0',10)||0;
-      if(n>0) live.textContent='🔥 hub '+n+'일 · dual-track 분리 유지';
+      var recentN=0;
+      try{ recentN=(JSON.parse(localStorage.getItem('hub_recent')||'[]')||[]).length; }catch(e){}
+      var bits=[];
+      if(n>0) bits.push('🔥 hub '+n+'일');
+      if(recentN) bits.push('최근 '+recentN+'앱');
+      bits.push('dual-track 분리');
+      live.textContent=bits.join(' · ');
     }
   }catch(e){}
 })();
