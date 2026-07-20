@@ -59,6 +59,8 @@ footer{text-align:center;color:#4f4a60;font-size:11px;margin-top:40px;line-heigh
   <a class="tn" data-u="my-pantheon/" style="color:#ece8f1;font-size:13px" href="https://hosuman08-netizen.github.io/my-pantheon/">Pantheon 스토리</a>
 </div>
 
+<div id="continue-strip" style="max-width:920px;margin:0 auto 14px;padding:12px 16px;border:1px solid #2a2438;border-radius:12px;background:#12101a;display:none"></div>
+
 <div class="grid" id="g"></div>
 <footer>All apps are free browser experiences. Simulation/entertainment only — not financial or professional advice.<br>
 <a href="mailto:hoyashi95@gmail.com?subject=%5BLegion%20Arcade%5D%20feedback" style="color:#8a8398">피드백</a>
@@ -68,6 +70,31 @@ var B="https://hosuman08-netizen.github.io/";
 // K-link: tag hub traffic so downstream apps can attribute (local only)
 function kRef(){try{var id=localStorage.getItem('hub_k_id');if(!id){id='h'+Math.random().toString(36).slice(2,8);localStorage.setItem('hub_k_id',id);}return id;}catch(e){return 'hub';}}
 function withK(u){try{var sep=u.indexOf('?')>=0?'&':'?';return u+sep+'ref='+encodeURIComponent(kRef());}catch(e){return u;}}
+// continue last + pin favorites (local retention loop)
+function hubPins(){try{return JSON.parse(localStorage.getItem('hub_pins')||'[]');}catch(e){return[];}}
+function savePins(a){try{localStorage.setItem('hub_pins',JSON.stringify(a.slice(0,8)));}catch(e){}}
+function markPlay(n,u){try{localStorage.setItem('hub_last_play',JSON.stringify({n:n,u:u,t:Date.now()}));}catch(e){}}
+function renderContinue(){
+  try{
+    var el=document.getElementById('continue-strip'); if(!el)return;
+    var last=JSON.parse(localStorage.getItem('hub_last_play')||'null');
+    var pins=hubPins();
+    if(!last && !pins.length){el.style.display='none';return;}
+    el.style.display='block';
+    var html='';
+    if(last&&last.u){
+      html+='<div style="margin-bottom:8px"><span style="color:#e0b552;font-weight:700;font-size:13px">▶ 이어서 </span>'
+        +'<a href="'+withK(last.u)+'" style="color:#ece8f1;font-size:13px;margin-left:8px">'+ (last.n||'최근 앱') +'</a></div>';
+    }
+    if(pins.length){
+      html+='<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span style="color:#8a8398;font-size:12px">📌 핀</span>'
+        +pins.map(function(p){return '<a href="'+withK(p.u)+'" style="color:#ece8f1;font-size:12px;padding:4px 10px;border:1px solid #3d3550;border-radius:999px;text-decoration:none">'+p.n+'</a>';}).join('')
+        +'</div>';
+    }
+    el.innerHTML=html;
+  }catch(e){}
+}
+
 var APPS=[
 {c:"게임 · Games"},
 {e:"⚔️",n:"Daedalus",d:"AI 군단 방치형 RPG",u:B+"daedalus-conquest/"},
@@ -249,6 +276,35 @@ APPS.forEach(function(a){
   }catch(e){}
 })();
 </script>
-<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(function(){});}</script>
+<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(function(){});}
+// hub_pin_bind_v1 — last play + long-press/dblclick pin
+(function(){
+  function bindCards(){
+    var g=document.getElementById('g'); if(!g)return;
+    Array.prototype.forEach.call(g.querySelectorAll('a.card'), function(a){
+      if(a.dataset.boundPlay)return; a.dataset.boundPlay='1';
+      var nm=(a.querySelector('.nm')||{}).textContent||a.textContent||'app';
+      var href=a.getAttribute('href')||'';
+      a.addEventListener('click', function(){ markPlay(nm.trim(), href.split('?')[0]); });
+      a.addEventListener('dblclick', function(ev){
+        ev.preventDefault();
+        var pins=hubPins();
+        var url=href.split('?')[0];
+        if(pins.some(function(p){return p.u===url;})){
+          pins=pins.filter(function(p){return p.u!==url;});
+        } else {
+          pins.unshift({n:nm.trim(),u:url});
+        }
+        savePins(pins); renderContinue();
+        try{legionTrack('pin',{n:nm})}catch(e){}
+      });
+    });
+    renderContinue();
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(bindCards,50); });
+  else setTimeout(bindCards,80);
+  setTimeout(bindCards,400);
+})();
+</script>
 
 </body></html>
