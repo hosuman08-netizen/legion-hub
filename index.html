@@ -124,9 +124,11 @@ function renderContinue(){
       html+='<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span style="color:#8a8398;font-size:12px">📌 핀</span>'
         +pins.map(function(p){return '<a href="'+withK(p.u)+'" style="color:#ece8f1;font-size:12px;padding:4px 10px;border:1px solid #3d3550;border-radius:999px;text-decoration:none">'+p.n+'</a>';}).join('')
         +'</div>';
+    } else {
+      html+='<div style="font-size:11px;color:#5f5a70;margin-top:4px">카드 더블클릭 → 핀 고정 (로컬)</div>';
     }
     try{var recent=JSON.parse(localStorage.getItem('hub_recent')||'[]');if(recent.length){html+='<div style="margin-top:8px;font-size:12px;color:#8a8398">최근 ';recent.slice(0,5).forEach(function(r){html+='<a href="'+withK(r.u)+'" style="color:#ece8f1;margin-right:8px">'+(r.n||'app').slice(0,14)+'</a>';});html+='</div>';}}catch(e){}
-el.innerHTML=html;
+    el.innerHTML=html;
   }catch(e){}
 }
 
