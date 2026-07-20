@@ -137,6 +137,20 @@ APPS.forEach(function(a){
     document.querySelectorAll('a.tn').forEach(function(a){
       var u=a.getAttribute('data-u'); if(u) a.href=withK(B+u);
     });
+    // K-ref on cash-pipe strip too (CRO attribution)
+    document.querySelectorAll('#pipe-strip a[href]').forEach(function(a){
+      try{ a.href=withK(a.href); }catch(e){}
+    });
+    // live core count badge
+    var note=document.querySelector('header .note');
+    if(note && !document.getElementById('hub-live-n')){
+      var n=APPS.filter(function(a){return !a.c;}).length;
+      var b=document.createElement('span');
+      b.id='hub-live-n';
+      b.style.cssText='display:inline-block;margin-left:8px;color:#e0b552;font-size:11px';
+      b.textContent='· live '+n;
+      note.appendChild(b);
+    }
     function tick(){
       var el=document.getElementById('tonight-cd'); if(!el) return;
       var now=new Date();
