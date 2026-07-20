@@ -142,6 +142,24 @@ APPS.forEach(function(a){
       el.textContent='자정까지 '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
     }
     tick(); setInterval(tick,1000);
+    // 1-tap share Arcade (K-ref)
+    if(!document.getElementById('hub-share')){
+      var bar=document.getElementById('tonight-strip');
+      if(bar){
+        var b=document.createElement('button');
+        b.id='hub-share';
+        b.type='button';
+        b.textContent='↗ 아케이드 공유';
+        b.style.cssText='font-size:12px;padding:6px 10px;border-radius:999px;border:1px solid #e0b552;background:transparent;color:#e0b552;cursor:pointer';
+        b.onclick=function(){
+          var url=withK(B+'legion-hub/');
+          var text='Legion Arcade — 22 free mini-apps (사주·타로·체스·RPG). No install.\n'+url;
+          if(navigator.share){ navigator.share({title:'Legion Arcade',text:text,url:url}).catch(function(){}); }
+          else if(navigator.clipboard){ navigator.clipboard.writeText(text); b.textContent='✓ 복사됨'; setTimeout(function(){b.textContent='↗ 아케이드 공유';},1600); }
+        };
+        bar.appendChild(b);
+      }
+    }
   }catch(e){}
 })();
 </script></body></html>
