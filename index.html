@@ -164,23 +164,52 @@ APPS.forEach(function(a){
       el.textContent='자정까지 '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
     }
     tick(); setInterval(tick,1000);
-    // 1-tap share Arcade (K-ref)
+    // 1-tap share-at-peak Arcade (K-ref) · Niobe 5H Tonight CTA
     if(!document.getElementById('hub-share')){
       var bar=document.getElementById('tonight-strip');
       if(bar){
         var b=document.createElement('button');
         b.id='hub-share';
         b.type='button';
-        b.textContent='↗ 아케이드 공유';
-        b.style.cssText='font-size:12px;padding:6px 10px;border-radius:999px;border:1px solid #e0b552;background:transparent;color:#e0b552;cursor:pointer';
+        b.setAttribute('aria-label','Tonight 피크 공유');
+        function shareLabel(){
+          var sn=0; try{sn=parseInt(localStorage.getItem('hub_share_n')||'0',10)||0;}catch(e){}
+          return sn>0 ? '↗ Tonight 공유 · K '+sn : '↗ Tonight 공유 · 친구 초대';
+        }
+        b.textContent=shareLabel();
+        b.style.cssText='font-size:12px;padding:6px 12px;border-radius:999px;border:1px solid #e0b552;background:linear-gradient(135deg,#2a2010,#15131d);color:#e0b552;cursor:pointer;font-weight:700';
         b.onclick=function(){
           var url=withK(B+'legion-hub/');
           var n=APPS.filter(function(a){return !a.c;}).length;
-          var text='Legion Arcade — '+n+' free mini-apps (사주·타로·체스·RPG). No install.\n'+url;
-          if(navigator.share){ navigator.share({title:'Legion Arcade',text:text,url:url}).catch(function(){}); }
-          else if(navigator.clipboard){ navigator.clipboard.writeText(text); b.textContent='✓ 복사됨'; setTimeout(function(){b.textContent='↗ 아케이드 공유';},1600); }
+          var hooks=['자정 전 한 판. 설치 없이 바로.','오늘 밤 아케이드 열림. 친구 태그.','사주·타로·에코 한곳에. 공유 ㄱ'];
+          var hook=hooks[new Date().getHours()%hooks.length];
+          var text=hook+'\nLegion Arcade · '+n+' apps free · no install\n'+url;
+          function bumpK(){
+            try{
+              var sn=(parseInt(localStorage.getItem('hub_share_n')||'0',10)||0)+1;
+              localStorage.setItem('hub_share_n',String(sn));
+              b.textContent='✓ 공유됨 · K '+sn;
+              setTimeout(function(){b.textContent=shareLabel();},1800);
+            }catch(e){ b.textContent='✓ 공유됨'; setTimeout(function(){b.textContent=shareLabel();},1600); }
+          }
+          if(navigator.share){
+            navigator.share({title:'Legion Arcade Tonight',text:text,url:url}).then(bumpK).catch(function(){});
+          } else if(navigator.clipboard){
+            navigator.clipboard.writeText(text).then(bumpK).catch(function(){ bumpK(); });
+          } else { bumpK(); }
         };
         bar.appendChild(b);
+        // K-proxy chip (virality signal)
+        if(!document.getElementById('hub-k-chip')){
+          var chip=document.createElement('span');
+          chip.id='hub-k-chip';
+          chip.style.cssText='font-size:11px;color:#8a8398;border:1px solid #3d3550;border-radius:999px;padding:3px 8px';
+          try{
+            var sn=parseInt(localStorage.getItem('hub_share_n')||'0',10)||0;
+            chip.textContent='K-proxy · shares '+sn;
+          }catch(e){ chip.textContent='K-proxy · shares 0'; }
+          bar.appendChild(chip);
+        }
       }
     }
     // Daily return chrome (Co-Star class) + hub visit streak
