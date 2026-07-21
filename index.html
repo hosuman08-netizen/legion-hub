@@ -127,16 +127,19 @@ function renderContinue(){
       var opens=+(localStorage.getItem('hub_day_open_'+dk)||0);
       var uniq=0;
       try{ uniq=(JSON.parse(localStorage.getItem('hub_day_uniq_'+dk)||'[]')||[]).length; }catch(e2){}
-      if(opens||uniq) html+='<div style="margin-bottom:6px;font-size:12px;color:#8a8398">오늘 탭 '+opens+' · 서로 다른 앱 '+uniq+(uniq>=3?' · field#1 워밍 ✓':' · 3앱 목표')+'</div>';
-      // 7d open spark
-      var spark='';
+      var goalU=3, gPct=Math.min(100,Math.round(uniq/goalU*100));
+      if(opens||uniq) html+='<div style="margin-bottom:6px;font-size:12px;color:#8a8398">오늘 탭 '+opens+' · 서로 다른 앱 '+uniq+'/'+goalU+(uniq>=goalU?' · field#1 워밍 ✓':' · 목표')+'</div>'
+        +'<div style="height:5px;background:#1c1826;border-radius:4px;margin-bottom:8px;overflow:hidden"><i style="display:block;height:100%;width:'+gPct+'%;background:linear-gradient(90deg,#e0b552,#67e8f9)"></i></div>';
+      // 7d open spark + active days
+      var spark='', actD=0;
       for(var i=6;i>=0;i--){
         var dd=new Date(); dd.setDate(dd.getDate()-i);
         var kk=dd.getFullYear()+'-'+(dd.getMonth()+1)+'-'+dd.getDate();
         var nn=+(localStorage.getItem('hub_day_open_'+kk)||0);
+        if(nn>0) actD++;
         spark+='<span title="'+kk+' '+nn+'" style="display:inline-block;width:10px;height:'+Math.max(4,Math.min(18,nn*3))+'px;background:'+(nn?'#e0b552':'#2a2438')+';border-radius:2px;margin-right:2px;vertical-align:bottom"></span>';
       }
-      html+='<div style="margin-bottom:8px;line-height:18px">'+spark+' <span style="font-size:11px;color:#5f5a70">7일 탭</span></div>';
+      html+='<div style="margin-bottom:8px;line-height:18px">'+spark+' <span style="font-size:11px;color:#5f5a70">7일 탭 · 활동일 '+actD+'/7</span></div>';
     }catch(e){}
     if(last&&last.u){
       var ago='';
@@ -217,12 +220,48 @@ var APPS=[
 {e:"📋",n:"Fund Card",d:"투명 공시 카드",u:B+"fund-card/"},
 ];
 var g=document.getElementById('g');
-APPS.forEach(function(a){
- if(a.c){var h=document.createElement('div');h.className='cat';h.textContent=a.c;g.appendChild(h);return;}
- var el=document.createElement('a');el.className='card';el.href=withK(a.u);
- el.innerHTML='<span class="emo">'+a.e+'</span><div class="nm">'+a.n+'</div><div class="ds">'+a.d+'</div>';
- g.appendChild(el);
-});
+function renderApps(q){
+  if(!g)return;
+  q=(q||'').trim().toLowerCase();
+  g.innerHTML='';
+  var lastCat=null, shown=0;
+  APPS.forEach(function(a){
+    if(a.c){ lastCat=a; return; }
+    var hay=((a.n||'')+' '+(a.d||'')+' '+(a.e||'')).toLowerCase();
+    if(q && hay.indexOf(q)<0) return;
+    if(lastCat){
+      var h=document.createElement('div'); h.className='cat'; h.textContent=lastCat.c; g.appendChild(h); lastCat=null;
+    }
+    var el=document.createElement('a'); el.className='card'; el.href=withK(a.u);
+    el.innerHTML='<span class="emo">'+a.e+'</span><div class="nm">'+a.n+'</div><div class="ds">'+a.d+'</div>';
+    g.appendChild(el); shown++;
+  });
+  if(!shown){
+    var empty=document.createElement('div'); empty.className='cat'; empty.style.opacity='.8';
+    empty.textContent=q?'검색 결과 없음 · 다른 키워드':'앱 목록 없음';
+    g.appendChild(empty);
+  }
+}
+(function(){
+  try{
+    var wrap=document.querySelector('.wrap');
+    var cont=document.getElementById('continue-strip');
+    if(wrap && !document.getElementById('hubSearch')){
+      var box=document.createElement('div');
+      box.style.cssText='max-width:920px;margin:0 auto 14px';
+      box.innerHTML='<input id="hubSearch" type="search" placeholder="앱 검색 · 사주 타로 에코 budget…" aria-label="앱 검색" style="width:100%;padding:12px 14px;border-radius:12px;border:1px solid #3d3550;background:#15131d;color:#ece8f1;font-size:14px"/>';
+      if(cont&&cont.parentNode) cont.parentNode.insertBefore(box, cont.nextSibling);
+      else if(g&&g.parentNode) g.parentNode.insertBefore(box, g);
+      var inp=document.getElementById('hubSearch');
+      var t=null;
+      if(inp) inp.addEventListener('input', function(){
+        clearTimeout(t); var v=inp.value;
+        t=setTimeout(function(){ renderApps(v); try{legionTrack('search',{q:v})}catch(e){} }, 120);
+      });
+    }
+  }catch(e){}
+})();
+renderApps('');
 // Tonight FOMO: countdown to local midnight + K-ref on quick links
 (function(){
   try{
