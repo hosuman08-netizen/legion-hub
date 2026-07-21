@@ -128,7 +128,8 @@ function renderContinue(){
       var uniq=0;
       try{ uniq=(JSON.parse(localStorage.getItem('hub_day_uniq_'+dk)||'[]')||[]).length; }catch(e2){}
       var goalU=3, gPct=Math.min(100,Math.round(uniq/goalU*100));
-      if(opens||uniq) html+='<div style="margin-bottom:6px;font-size:12px;color:#8a8398">오늘 탭 '+opens+' · 서로 다른 앱 '+uniq+'/'+goalU+(uniq>=goalU?' · field#1 워밍 ✓':' · 목표')+'</div>'
+      var pinN=0; try{ pinN=(JSON.parse(localStorage.getItem('hub_pins')||'[]')||[]).length; }catch(e3){}
+      if(opens||uniq) html+='<div style="margin-bottom:6px;font-size:12px;color:#8a8398">오늘 탭 '+opens+' · 서로 다른 앱 '+uniq+'/'+goalU+(uniq>=goalU?' · field#1 워밍 ✓':' · 목표')+(pinN?' · 📌'+pinN:'')+'</div>'
         +'<div style="height:5px;background:#1c1826;border-radius:4px;margin-bottom:8px;overflow:hidden"><i style="display:block;height:100%;width:'+gPct+'%;background:linear-gradient(90deg,#e0b552,#67e8f9)"></i></div>';
       // 7d open spark + active days
       var spark='', actD=0;
